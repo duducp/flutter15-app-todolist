@@ -15,40 +15,74 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final _toDoController = TextEditingController();
   List _toDoList = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Lista de Tarefas'),
-          backgroundColor: Colors.blueAccent,
-          centerTitle: true,
-        ),
-        body: Column(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.fromLTRB(17, 1, 10, 1),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Nova Tarefa',
-                        labelStyle: TextStyle(color: Colors.blueAccent),
-                      ),
+      appBar: AppBar(
+        title: Text('Lista de Tarefas'),
+        backgroundColor: Colors.blueAccent,
+        centerTitle: true,
+      ),
+      body: Column(
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.fromLTRB(17, 1, 10, 1),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: TextFormField(
+                    controller: _toDoController,
+                    decoration: InputDecoration(
+                      labelText: 'Nova Tarefa',
+                      labelStyle: TextStyle(color: Colors.blueAccent),
                     ),
                   ),
-                  RaisedButton(
-                      color: Colors.blueAccent,
-                      child: Text('Add'),
-                      textColor: Colors.white,
-                      onPressed: () {})
-                ],
-              ),
-            )
-          ],
-        ));
+                ),
+                RaisedButton(
+                    color: Colors.blueAccent,
+                    child: Text('Add'),
+                    textColor: Colors.white,
+                    onPressed: _addToDo)
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.only(top: 10.0),
+              itemCount: _toDoList.length,
+              itemBuilder: (context, index) {
+                return CheckboxListTile(
+                  title: Text(_toDoList[index]['title']),
+                  value: _toDoList[index]['ok'],
+                  secondary: CircleAvatar(
+                    child: Icon(
+                        _toDoList[index]['ok'] ? Icons.check : Icons.error),
+                  ),
+                  onChanged: (check) {
+                    setState(() {
+                      _toDoList[index]['ok'] = check;
+                    });
+                  },
+                );
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _addToDo() {
+    setState(() {
+      Map<String, dynamic> newToDo = Map();
+      newToDo['title'] = _toDoController.text;
+      newToDo['ok'] = false;
+      _toDoController.text = '';
+      _toDoList.add(newToDo);
+    });
   }
 
   Future<File> _getFile() async {
