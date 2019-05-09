@@ -18,6 +18,17 @@ class _HomeState extends State<Home> {
   final _toDoController = TextEditingController();
   List _toDoList = [];
 
+
+  @override
+  void initState() {
+    super.initState();
+    _readData().then((data) {
+      setState(() {
+        _toDoList = json.decode(data);
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,10 +53,11 @@ class _HomeState extends State<Home> {
                   ),
                 ),
                 RaisedButton(
-                    color: Colors.blueAccent,
-                    child: Text('Add'),
-                    textColor: Colors.white,
-                    onPressed: _addToDo)
+                  color: Colors.blueAccent,
+                  child: Text('Add'),
+                  textColor: Colors.white,
+                  onPressed: _addToDo,
+                )
               ],
             ),
           ),
@@ -64,6 +76,7 @@ class _HomeState extends State<Home> {
                   onChanged: (check) {
                     setState(() {
                       _toDoList[index]['ok'] = check;
+                      _saveData();
                     });
                   },
                 );
@@ -83,6 +96,7 @@ class _HomeState extends State<Home> {
       _toDoController.text = '';
       _toDoList.add(newToDo);
     });
+    _saveData();
   }
 
   Future<File> _getFile() async {
