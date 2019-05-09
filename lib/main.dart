@@ -63,10 +63,13 @@ class _HomeState extends State<Home> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(top: 10.0),
-              itemCount: _toDoList.length,
-              itemBuilder: buildItem,
+            child: RefreshIndicator(
+              child: ListView.builder(
+                padding: EdgeInsets.only(top: 10.0),
+                itemCount: _toDoList.length,
+                itemBuilder: buildItem,
+              ),
+              onRefresh: _refresh,
             ),
           )
         ],
@@ -111,12 +114,14 @@ class _HomeState extends State<Home> {
 
           final snackbar = SnackBar(
             content: Text('Tarefa \"${_lastRemoved['title']}\" removida'),
-            action: SnackBarAction(label: 'Desfazer', onPressed: () {
-              setState(() {
-                _toDoList.insert(_lastRemovedPos, _lastRemoved);
-                _saveData();
-              });
-            }),
+            action: SnackBarAction(
+                label: 'Desfazer',
+                onPressed: () {
+                  setState(() {
+                    _toDoList.insert(_lastRemovedPos, _lastRemoved);
+                    _saveData();
+                  });
+                }),
             duration: Duration(seconds: 2),
           );
           Scaffold.of(context).showSnackBar(snackbar);
@@ -134,6 +139,25 @@ class _HomeState extends State<Home> {
       _toDoList.add(newToDo);
     });
     _saveData();
+  }
+
+  Future<Null> _refresh() async {
+    await Future.delayed(Duration(seconds: 1));
+
+    setState(() {
+      _toDoList.sort((oneItem, twoItem) {
+        if (oneItem['ok'] && !twoItem['ok'])
+          return 1;
+        else if (!oneItem['ok'] && twoItem['ok'])
+          return -1;
+        else
+          return 0;
+      });
+
+      _saveData();
+    });
+
+    return null;
   }
 
   Future<File> _getFile() async {
